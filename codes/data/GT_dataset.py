@@ -28,8 +28,7 @@ class GTDataset(data.Dataset):
         if self.paths_LQ and self.paths_GT:
             assert len(self.paths_LQ) == len(
                 self.paths_GT
-            ), 'GT and LQ datasets have different number of images - {}, {}.'.format(
-                len(self.paths_LQ), len(self.paths_GT))
+            ), f'GT and LQ datasets have different number of images - {len(self.paths_LQ)}, {len(self.paths_GT)}.'
         self.random_scale_list = [1]
 
     def _init_lmdb(self):
@@ -40,9 +39,12 @@ class GTDataset(data.Dataset):
                                 meminit=False)
 
     def __getitem__(self, index):
-        if self.data_type == 'lmdb':
-            if (self.GT_env is None) or (self.LQ_env is None):
-                self._init_lmdb()
+        if (
+            self.data_type == 'lmdb'
+            and (self.GT_env is None)
+            or (self.LQ_env is None)
+        ):
+            self._init_lmdb()
         GT_path, LQ_path = None, None
         scale = self.opt['scale']
         GT_size = self.opt['GT_size']

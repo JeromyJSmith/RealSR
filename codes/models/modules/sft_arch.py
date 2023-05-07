@@ -42,11 +42,8 @@ class SFT_Net(nn.Module):
         super(SFT_Net, self).__init__()
         self.conv0 = nn.Conv2d(3, 64, 3, 1, 1)
 
-        sft_branch = []
-        for i in range(16):
-            sft_branch.append(ResBlock_SFT())
-        sft_branch.append(SFTLayer())
-        sft_branch.append(nn.Conv2d(64, 64, 3, 1, 1))
+        sft_branch = [ResBlock_SFT() for _ in range(16)]
+        sft_branch.extend((SFTLayer(), nn.Conv2d(64, 64, 3, 1, 1)))
         self.sft_branch = nn.Sequential(*sft_branch)
 
         self.HR_branch = nn.Sequential(nn.Conv2d(64, 256, 3, 1,
@@ -67,8 +64,7 @@ class SFT_Net(nn.Module):
         fea = self.conv0(x[0])
         res = self.sft_branch((fea, cond))
         fea = fea + res
-        out = self.HR_branch(fea)
-        return out
+        return self.HR_branch(fea)
 
 
 # Auxiliary Classifier Discriminator
@@ -159,11 +155,8 @@ class SFT_Net_torch(nn.Module):
         super(SFT_Net_torch, self).__init__()
         self.conv0 = nn.Conv2d(3, 64, 3, 1, 1)
 
-        sft_branch = []
-        for i in range(16):
-            sft_branch.append(ResBlock_SFT_torch())
-        sft_branch.append(SFTLayer_torch())
-        sft_branch.append(nn.Conv2d(64, 64, 3, 1, 1))
+        sft_branch = [ResBlock_SFT_torch() for _ in range(16)]
+        sft_branch.extend((SFTLayer_torch(), nn.Conv2d(64, 64, 3, 1, 1)))
         self.sft_branch = nn.Sequential(*sft_branch)
 
         self.HR_branch = nn.Sequential(nn.Upsample(scale_factor=2, mode='nearest'),
@@ -186,5 +179,4 @@ class SFT_Net_torch(nn.Module):
         fea = self.conv0(x[0])
         res = self.sft_branch((fea, cond))
         fea = fea + res
-        out = self.HR_branch(fea)
-        return out
+        return self.HR_branch(fea)

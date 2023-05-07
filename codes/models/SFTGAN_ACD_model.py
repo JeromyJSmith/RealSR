@@ -99,15 +99,13 @@ class SFTGAN_ACD_Model(BaseModel):
                                                 betas=(train_opt['beta1_D'], 0.999))
             self.optimizers.append(self.optimizer_D)
 
-            # schedulers
-            if train_opt['lr_scheme'] == 'MultiStepLR':
-                for optimizer in self.optimizers:
-                    self.schedulers.append(
-                        lr_scheduler.MultiStepLR(optimizer, train_opt['lr_steps'],
-                                                 train_opt['lr_gamma']))
-            else:
+            if train_opt['lr_scheme'] != 'MultiStepLR':
                 raise NotImplementedError('MultiStepLR learning rate scheme is enough.')
 
+            for optimizer in self.optimizers:
+                self.schedulers.append(
+                    lr_scheduler.MultiStepLR(optimizer, train_opt['lr_steps'],
+                                             train_opt['lr_gamma']))
             self.log_dict = OrderedDict()
         # print network
         self.print_network()
@@ -219,10 +217,9 @@ class SFTGAN_ACD_Model(BaseModel):
         # G
         s, n = self.get_network_description(self.netG)
         if isinstance(self.netG, nn.DataParallel):
-            net_struc_str = '{} - {}'.format(self.netG.__class__.__name__,
-                                             self.netG.module.__class__.__name__)
+            net_struc_str = f'{self.netG.__class__.__name__} - {self.netG.module.__class__.__name__}'
         else:
-            net_struc_str = '{}'.format(self.netG.__class__.__name__)
+            net_struc_str = f'{self.netG.__class__.__name__}'
 
         logger.info('Network G structure: {}, with parameters: {:,d}'.format(net_struc_str, n))
         logger.info(s)
@@ -230,10 +227,9 @@ class SFTGAN_ACD_Model(BaseModel):
             # D
             s, n = self.get_network_description(self.netD)
             if isinstance(self.netD, nn.DataParallel):
-                net_struc_str = '{} - {}'.format(self.netD.__class__.__name__,
-                                                 self.netD.module.__class__.__name__)
+                net_struc_str = f'{self.netD.__class__.__name__} - {self.netD.module.__class__.__name__}'
             else:
-                net_struc_str = '{}'.format(self.netD.__class__.__name__)
+                net_struc_str = f'{self.netD.__class__.__name__}'
 
             logger.info('Network D structure: {}, with parameters: {:,d}'.format(net_struc_str, n))
             logger.info(s)
@@ -241,10 +237,9 @@ class SFTGAN_ACD_Model(BaseModel):
             if self.cri_fea:  # F, Perceptual Network
                 s, n = self.get_network_description(self.netF)
                 if isinstance(self.netF, nn.DataParallel):
-                    net_struc_str = '{} - {}'.format(self.netF.__class__.__name__,
-                                                     self.netF.module.__class__.__name__)
+                    net_struc_str = f'{self.netF.__class__.__name__} - {self.netF.module.__class__.__name__}'
                 else:
-                    net_struc_str = '{}'.format(self.netF.__class__.__name__)
+                    net_struc_str = f'{self.netF.__class__.__name__}'
 
                 logger.info('Network F structure: {}, with parameters: {:,d}'.format(
                     net_struc_str, n))

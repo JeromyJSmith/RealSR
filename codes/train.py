@@ -61,8 +61,13 @@ def main():
         if resume_state is None:
             util.mkdir_and_rename(
                 opt['path']['experiments_root'])  # rename experiment folder if exists
-            util.mkdirs((path for key, path in opt['path'].items() if not key == 'experiments_root'
-                         and 'pretrain_model' not in key and 'resume' not in key))
+            util.mkdirs(
+                path
+                for key, path in opt['path'].items()
+                if key != 'experiments_root'
+                and 'pretrain_model' not in key
+                and 'resume' not in key
+            )
 
         # config loggers. Before it, the log will not work
         util.setup_logger('base', opt['path']['log'], 'train_' + opt['name'], level=logging.INFO,
@@ -73,12 +78,13 @@ def main():
         logger.info(option.dict2str(opt))
         # tensorboard logger
         if opt['use_tb_logger'] and 'debug' not in opt['name']:
-            version = float(torch.__version__[0:3])
+            version = float(torch.__version__[:3])
             if version >= 1.1:  # PyTorch 1.1
                 from torch.utils.tensorboard import SummaryWriter
             else:
                 logger.info(
-                    'You are using PyTorch {}. Tensorboard will use [tensorboardX]'.format(version))
+                    f'You are using PyTorch {version}. Tensorboard will use [tensorboardX]'
+                )
                 from tensorboardX import SummaryWriter
             tb_logger = SummaryWriter(log_dir='../tb_logger/' + opt['name'])
     else:
@@ -93,7 +99,7 @@ def main():
     if seed is None:
         seed = random.randint(1, 10000)
     if rank <= 0:
-        logger.info('Random seed: {}'.format(seed))
+        logger.info(f'Random seed: {seed}')
     util.set_random_seed(seed)
 
     torch.backends.cudnn.benckmark = True
@@ -136,8 +142,9 @@ def main():
 
     #### resume training
     if resume_state:
-        logger.info('Resuming training from epoch: {}, iter: {}.'.format(
-            resume_state['epoch'], resume_state['iter']))
+        logger.info(
+            f"Resuming training from epoch: {resume_state['epoch']}, iter: {resume_state['iter']}."
+        )
 
         start_epoch = resume_state['epoch']
         current_step = resume_state['iter']
@@ -170,9 +177,12 @@ def main():
                 for k, v in logs.items():
                     message += '{:s}: {:.4e} '.format(k, v)
                     # tensorboard logger
-                    if opt['use_tb_logger'] and 'debug' not in opt['name']:
-                        if rank <= 0:
-                            tb_logger.add_scalar(k, v, current_step)
+                    if (
+                        opt['use_tb_logger']
+                        and 'debug' not in opt['name']
+                        and rank <= 0
+                    ):
+                        tb_logger.add_scalar(k, v, current_step)
                 if rank <= 0:
                     logger.info(message)
 
@@ -225,11 +235,13 @@ def main():
                     tb_logger.add_scalar('val_mean_color_err', val_mean_color_err, current_step)
 
             #### save models and training states
-            if current_step % opt['logger']['save_checkpoint_freq'] == 0:
-                if rank <= 0:
-                    logger.info('Saving models and training states.')
-                    model.save(current_step)
-                    model.save_training_state(epoch, current_step)
+            if (
+                current_step % opt['logger']['save_checkpoint_freq'] == 0
+                and rank <= 0
+            ):
+                logger.info('Saving models and training states.')
+                model.save(current_step)
+                model.save_training_state(epoch, current_step)
 
     if rank <= 0:
         logger.info('Saving the final model.')

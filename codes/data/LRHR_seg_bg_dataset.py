@@ -31,9 +31,9 @@ class LRHRSeg_BG_Dataset(data.Dataset):
 
         assert self.paths_HR, 'Error: HR path is empty.'
         if self.paths_LR and self.paths_HR:
-            assert len(self.paths_LR) == len(self.paths_HR), \
-                'HR and LR datasets have different number of images - {}, {}.'.format(
-                len(self.paths_LR), len(self.paths_HR))
+            assert len(self.paths_LR) == len(
+                self.paths_HR
+            ), f'HR and LR datasets have different number of images - {len(self.paths_LR)}, {len(self.paths_HR)}.'
 
         self.random_scale_list = [1, 0.9, 0.8, 0.7, 0.6, 0.5]
         self.ratio = 10  # 10 OST data samples and 1 DIV2K general data samples(background)
