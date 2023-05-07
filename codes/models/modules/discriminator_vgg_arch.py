@@ -99,8 +99,7 @@ class Discriminator_VGG_128(nn.Module):
 
         fea = fea.view(fea.size(0), -1)
         fea = self.lrelu(self.linear1(fea))
-        out = self.linear2(fea)
-        return out
+        return self.linear2(fea)
 
 class Discriminator_VGG_256(nn.Module):
     def __init__(self, in_nc, nf):
@@ -162,8 +161,7 @@ class Discriminator_VGG_256(nn.Module):
 
         fea = fea.view(fea.size(0), -1)
         fea = self.lrelu(self.linear1(fea))
-        out = self.linear2(fea)
-        return out
+        return self.linear2(fea)
 
 
 class Discriminator_VGG_512(nn.Module):
@@ -234,8 +232,7 @@ class Discriminator_VGG_512(nn.Module):
 
         fea = fea.view(fea.size(0), -1)
         fea = self.lrelu(self.linear1(fea))
-        out = self.linear2(fea)
-        return out
+        return self.linear2(fea)
 
 
 class VGGFeatureExtractor(nn.Module):
@@ -263,5 +260,4 @@ class VGGFeatureExtractor(nn.Module):
         # Assume input range is [0, 1]
         if self.use_input_norm:
             x = (x - self.mean) / self.std
-        output = self.features(x)
-        return output
+        return self.features(x)

@@ -29,7 +29,7 @@ img_list = sorted(glob.glob(img_folder))
 if mode == 1:
     print('Read images...')
     dataset = [cv2.imread(v, cv2.IMREAD_UNCHANGED) for v in img_list]
-    data_size = sum([img.nbytes for img in dataset])
+    data_size = sum(img.nbytes for img in dataset)
 elif mode == 2:
     print('Calculating the total size of images...')
     data_size = sum(os.stat(v).st_size for v in img_list)
@@ -42,7 +42,7 @@ pbar = ProgressBar(len(img_list))
 env = lmdb.open(lmdb_save_path, map_size=data_size * 10)
 txn = env.begin(write=True)  # txn is a Transaction object
 for i, v in enumerate(img_list):
-    pbar.update('Write {}'.format(v))
+    pbar.update(f'Write {v}')
     base_name = osp.splitext(osp.basename(v))[0]
     key = base_name.encode('ascii')
     data = dataset[i] if mode == 1 else cv2.imread(v, cv2.IMREAD_UNCHANGED)
@@ -69,13 +69,12 @@ print('Finish writing lmdb.')
 same_resolution = (len(set(resolution_l)) <= 1)
 if same_resolution:
     meta_info['resolution'] = [resolution_l[0]]
-    meta_info['keys'] = key_l
     print('All images have the same resolution. Simplify the meta info...')
 else:
     meta_info['resolution'] = resolution_l
-    meta_info['keys'] = key_l
     print('Not all images have the same resolution. Save meta info for each image...')
 
+meta_info['keys'] = key_l
 #### pickle dump
 pickle.dump(meta_info, open(osp.join(lmdb_save_path, 'meta_info.pkl'), "wb"))
 print('Finish creating lmdb meta info.')

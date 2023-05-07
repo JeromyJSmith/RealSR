@@ -14,10 +14,10 @@ from scipy.io import loadmat
 class kernelDataset(data.Dataset):
     def __init__(self, dataset='x2/'):
         super(kernelDataset, self).__init__()
-        
+
         base = dataset
-        
-        self.mat_files = sorted(glob.glob(base + '*.mat'))
+
+        self.mat_files = sorted(glob.glob(f'{base}*.mat'))
         
     def __getitem__(self, index):
         mat = loadmat(self.mat_files[index])
@@ -40,7 +40,7 @@ class noiseDataset(data.Dataset):
         assert os.path.exists(base)
 
         # self.mat_files = sorted(glob.glob(base + '*.mat'))
-        self.noise_imgs = sorted(glob.glob(base + '*.png'))
+        self.noise_imgs = sorted(glob.glob(f'{base}*.png'))
         self.pre_process = transforms.Compose([transforms.RandomCrop(32),
                                                transforms.ToTensor()])
 
@@ -50,8 +50,7 @@ class noiseDataset(data.Dataset):
         # x = np.swapaxes(x, 2, 0)
         # print(np.shape(x))
         noise = self.pre_process(Image.open(self.noise_imgs[index]))
-        norm_noise = (noise - torch.mean(noise, dim=[1, 2], keepdim=True))
-        return norm_noise
+        return (noise - torch.mean(noise, dim=[1, 2], keepdim=True))
 
     def __len__(self):
         return len(self.noise_imgs)
